@@ -12,6 +12,7 @@ import { readMasterBalance, publicClient } from '@/lib/onchain'
 
 // Vercel: allow up to 60s for on-chain tx confirmation
 export const maxDuration = 60
+export const dynamic = 'force-dynamic'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,

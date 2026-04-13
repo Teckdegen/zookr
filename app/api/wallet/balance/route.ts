@@ -5,6 +5,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { readTokenBalance } from '@/lib/onchain'
 import { fetchBothPrices } from '@/lib/priceFeed'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(req: NextRequest) {
   const walletAddress = req.nextUrl.searchParams.get('wallet_address')
 
