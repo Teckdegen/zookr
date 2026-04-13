@@ -145,21 +145,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Gambling Warning */}
-      <section className="bg-[#1E1B14] border-t border-[#2E2618] px-6 md:px-16 lg:px-24 py-10">
-        <div className="flex gap-4 items-start max-w-2xl">
-          <SkullIcon size={18} className="text-[#DC143C] mt-0.5 shrink-0" />
-          <div>
-            <p className="font-mono text-[10px] tracking-[0.3em] text-[#DC143C] uppercase mb-3">Gambling Warning</p>
-            <p className="text-[#7A6E58] text-xs leading-relaxed">
-              ZOOKR involves real money and financial risk. Only play with what you can afford to lose entirely.
-              This platform is intended for users aged 18 and over. Gambling can be addictive — seek help if needed.
-              ZOOKR does not guarantee any returns. Past outcomes do not predict future results.
-            </p>
-          </div>
-        </div>
-      </section>
-
       {/* Footer */}
       <footer className="bg-[#0A0806] border-t border-[#2E2618] px-6 md:px-16 lg:px-24 py-6">
         <div className="flex justify-between items-center">
