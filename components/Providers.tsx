@@ -9,23 +9,20 @@ import { AgeGate } from '@/components/AgeGate'
 
 const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || ''
 
-// Only run in browser — WalletConnect uses IndexedDB which doesn't exist in Node SSR
-let web3ModalReady = false
-if (typeof window !== 'undefined' && !web3ModalReady) {
-  web3ModalReady = true
-  createWeb3Modal({
-    wagmiConfig,
-    projectId,
-    enableAnalytics: false,
-    themeMode: 'dark',
-    themeVariables: {
-      '--w3m-color-mix': '#DC143C',
-      '--w3m-color-mix-strength': 20,
-      '--w3m-accent': '#DC143C',
-      '--w3m-border-radius-master': '0px',
-    },
-  })
-}
+// This module is only ever loaded client-side (ssr:false in layout.tsx),
+// so createWeb3Modal can run at module level safely.
+createWeb3Modal({
+  wagmiConfig,
+  projectId,
+  enableAnalytics: false,
+  themeMode: 'dark',
+  themeVariables: {
+    '--w3m-color-mix': '#DC143C',
+    '--w3m-color-mix-strength': 20,
+    '--w3m-accent': '#DC143C',
+    '--w3m-border-radius-master': '0px',
+  },
+})
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient())

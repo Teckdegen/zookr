@@ -43,7 +43,16 @@ export default function LandingPage() {
       <Ticker />
 
       {/* Hero */}
-      <section className="flex-1 flex flex-col justify-center px-6 md:px-16 lg:px-24 py-24 bg-[#1E1B14]">
+      <section className="relative flex-1 flex flex-col justify-center px-6 md:px-16 lg:px-24 py-24 bg-[#1E1B14] overflow-hidden">
+        {/* Faded skull character — top-right, bleeds off edge */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="https://www.image2url.com/r2/default/images/1776122004235-7b55981b-e92b-4619-b49e-143bb1183ab0.png"
+          alt=""
+          aria-hidden="true"
+          className="pointer-events-none select-none absolute -top-8 -right-16 md:-right-8 h-[70%] md:h-[90%] max-h-[640px] w-auto object-contain opacity-[0.07]"
+        />
+
         <div className="flex items-center gap-3 mb-6">
           <SkullIcon size={16} className="text-[#7A6E58]" />
           <p className="font-mono text-[10px] tracking-[0.3em] text-[#7A6E58] uppercase">

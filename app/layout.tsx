@@ -1,7 +1,14 @@
 import type { Metadata } from 'next'
 import { Cormorant_Garamond, JetBrains_Mono, Inter } from 'next/font/google'
+import dynamic from 'next/dynamic'
 import './globals.css'
-import { Providers } from '@/components/Providers'
+
+// Load all wallet/web3 providers client-side only — they use IndexedDB and
+// browser-only APIs that crash Node.js SSR prerendering.
+const Providers = dynamic(
+  () => import('@/components/Providers').then((m) => ({ default: m.Providers })),
+  { ssr: false }
+)
 
 const cormorant = Cormorant_Garamond({
   subsets: ['latin'],
@@ -25,12 +32,15 @@ const inter = Inter({
   display: 'swap',
 })
 
+const ICON = 'https://www.image2url.com/r2/default/images/1776122004235-7b55981b-e92b-4619-b49e-143bb1183ab0.png'
+
 export const metadata: Metadata = {
   title: 'ZOOKR — Bet Your Fate. Enter Valhalla.',
   description: 'The dead play different. Powered by $DEAD',
   icons: {
-    icon: 'https://www.image2url.com/r2/default/images/1776089766135-1029fb0f-e966-44f2-a542-1ece70cc5aa1.png',
-    apple: 'https://www.image2url.com/r2/default/images/1776089766135-1029fb0f-e966-44f2-a542-1ece70cc5aa1.png',
+    icon: ICON,
+    apple: ICON,
+    shortcut: ICON,
   },
 }
 
