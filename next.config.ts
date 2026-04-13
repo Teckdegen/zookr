@@ -13,6 +13,8 @@ const nextConfig: NextConfig = {
         tls: false,
         crypto: false,
         stream: false,
+        encoding: false,
+        'pino-pretty': false,
       }
     }
     return config
