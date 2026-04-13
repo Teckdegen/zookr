@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
 import { SkullIcon, SwordIcon, SkeletonHead } from '@/components/icons'
 
 function HomeIcon({ size = 18 }: { size?: number }) {

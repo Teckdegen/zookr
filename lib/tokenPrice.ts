@@ -3,13 +3,6 @@
 
 const COINGECKO_BASE = 'https://api.coingecko.com/api/v3'
 
-// Replace with actual CoinGecko token IDs once listed
-// If not listed, use contract address lookup
-const TOKEN_IDS: Record<string, string> = {
-  DEAD: process.env.NEXT_PUBLIC_DEAD_COINGECKO_ID || '',
-  UDEAD: process.env.NEXT_PUBLIC_UDEAD_COINGECKO_ID || '',
-}
-
 const TOKEN_ADDRESSES: Record<string, string> = {
   DEAD: process.env.NEXT_PUBLIC_DEAD_TOKEN_ADDRESS || '',
   UDEAD: process.env.NEXT_PUBLIC_UDEAD_TOKEN_ADDRESS || '',

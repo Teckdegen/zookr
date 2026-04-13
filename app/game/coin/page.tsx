@@ -18,7 +18,7 @@ const MASTER_ADDRESS = process.env.NEXT_PUBLIC_MASTER_WALLET_ADDRESS as `0x${str
 // ── Sounds ────────────────────────────────────────────────────────────────────
 function playSound(type: 'win' | 'loss' | 'flip') {
   try {
-    const ctx  = new (window.AudioContext || (window as any).webkitAudioContext)()
+    const ctx  = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)()
     const osc  = ctx.createOscillator()
     const gain = ctx.createGain()
     osc.connect(gain); gain.connect(ctx.destination)
@@ -126,18 +126,18 @@ export default function CoinFlipPage() {
           const won = outcomeRef.current === 'win'
           const landed: Side = won ? side : (side === 'heads' ? 'tails' : 'heads')
           setLandedSide(landed)
-          setTimeout(() => resolveGame(landed), 600)
+          setTimeout(() => resolveGame(), 600)
         }
       }, 80)
 
-    } catch (e: any) {
-      setError(e?.shortMessage || 'Transaction rejected')
+    } catch (e: unknown) {
+      setError((e as { shortMessage?: string })?.shortMessage || 'Transaction rejected')
       setPhase('idle')
       setPick(null)
     }
   }
 
-  async function resolveGame(landed: Side) {
+  async function resolveGame() {
     const res = await fetch('/api/game/resolve', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

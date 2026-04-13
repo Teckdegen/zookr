@@ -21,7 +21,7 @@ export default function RoomPage() {
   const router = useRouter()
   const roomId = params.id as string
 
-  const [room, setRoom] = useState<any>(null)
+  const [room, setRoom] = useState<{ name: string; host_user_id: string; game_mode: string; stake_amount: number; max_players: number } | null>(null)
   const [members, setMembers] = useState<Member[]>([])
   const [messages, setMessages] = useState<Message[]>([])
   const [chatInput, setChatInput] = useState('')
@@ -75,12 +75,12 @@ export default function RoomPage() {
       loadMembers()
     }
     load()
-  }, [address, roomId, router])
+  }, [address, roomId, router, loadMembers])
 
-  async function loadMembers() {
+  const loadMembers = useCallback(async () => {
     const { data } = await supabase.from('room_members').select('user_id, username').eq('room_id', roomId)
     setMembers(data ?? [])
-  }
+  }, [roomId])
 
   useEffect(() => {
     const channel = supabase.channel(`room:${roomId}`)
@@ -106,7 +106,7 @@ export default function RoomPage() {
       })
       .subscribe()
     return () => { supabase.removeChannel(channel) }
-  }, [roomId])
+  }, [roomId, loadMembers])
 
   // Generate reel prices around current live price
   function buildReelPrices(realPrice: number): string[] {

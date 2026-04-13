@@ -19,7 +19,7 @@ const MASTER_ADDRESS  = process.env.NEXT_PUBLIC_MASTER_WALLET_ADDRESS as `0x${st
 // ── Sounds ────────────────────────────────────────────────────────────────────
 function playSound(type: 'win' | 'loss' | 'spin' | 'stop') {
   try {
-    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)()
+    const ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)()
     const osc = ctx.createOscillator()
     const gain = ctx.createGain()
     osc.connect(gain); gain.connect(ctx.destination)
@@ -164,8 +164,8 @@ export default function DeadPricePage() {
         playSound('spin')
       }, 80)
 
-    } catch (e: any) {
-      setError(e?.shortMessage || 'Transaction rejected')
+    } catch (e: unknown) {
+      setError((e as { shortMessage?: string })?.shortMessage || 'Transaction rejected')
       setPhase('idle')
     }
   }

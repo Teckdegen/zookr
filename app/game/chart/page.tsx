@@ -11,12 +11,9 @@ export default function WarChartGate() {
   const router = useRouter()
   const [code, setCode] = useState('')
   const [error, setError] = useState('')
-  const [unlocked, setUnlocked] = useState(false)
-
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (code === ACCESS_CODE) {
-      setUnlocked(true)
       router.push('/game/chart/play')
     } else {
       setError('Invalid access code.')
