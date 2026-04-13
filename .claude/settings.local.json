@@ -7,7 +7,9 @@
       "Bash(mkdir -p /c/Users/divin/OneDrive/Desktop/zookr/mediasoup-server/src)",
       "Bash(npm init:*)",
       "Bash(npm uninstall:*)",
-      "Bash(xargs sed:*)"
+      "Bash(xargs sed:*)",
+      "Bash(npm view:*)",
+      "Bash(node -e \"const v=require\\('fs'\\).readFileSync\\('/dev/stdin','utf8'\\); const arr=JSON.parse\\(v\\); console.log\\(arr.filter\\(x=>x.startsWith\\('15.'\\)\\).slice\\(-10\\).join\\('\\\\n'\\)\\)\")"
     ]
   }
 }
