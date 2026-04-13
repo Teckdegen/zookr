@@ -1,10 +1,18 @@
 import type { NextConfig } from 'next'
+import path from 'path'
 
 const nextConfig: NextConfig = {
   webpack: (config, { isServer }) => {
     if (!isServer) {
-      // Stub out Node.js-only modules that leak into browser bundles
-      // via wagmi connectors / coinbase SDK
+      // Alias Node-only packages to empty stubs so the browser bundle doesn't break.
+      // These are pulled in by wagmi's baseAccount connector (which we don't use).
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        'bs58': path.resolve('./lib/empty-stub.js'),
+        '@coinbase/cdp-sdk': path.resolve('./lib/empty-stub.js'),
+        '@base-org/account': path.resolve('./lib/empty-stub.js'),
+      }
+
       config.resolve.fallback = {
         ...config.resolve.fallback,
         fs: false,
@@ -12,11 +20,6 @@ const nextConfig: NextConfig = {
         tls: false,
         crypto: false,
         stream: false,
-        url: false,
-        zlib: false,
-        http: false,
-        https: false,
-        bs58: false,
       }
     }
     return config
