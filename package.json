@@ -19,7 +19,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "viem": "^2.21.0",
-    "wagmi": "^2.14.0"
+    "wagmi": "2.12.7"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
