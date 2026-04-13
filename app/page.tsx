@@ -39,41 +39,49 @@ export default function LandingPage() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col bg-[#0A0806]">
-      <Ticker />
+    <main className="flex flex-col bg-[#0A0806]">
+      {/* Ticker + Hero together fill exactly one viewport */}
+      <div className="min-h-[100svh] flex flex-col">
+        <Ticker />
 
-      {/* Hero */}
-      <section className="relative flex-1 flex flex-col justify-center px-6 md:px-16 lg:px-24 py-24 bg-[#1E1B14] overflow-hidden">
-        {/* Faded skull character — top-right, bleeds off edge */}
+      {/* Hero — fills full viewport on mobile and desktop */}
+      <section className="relative flex-1 flex flex-col justify-center px-6 md:px-16 lg:px-24 py-10 md:py-24 bg-[#1E1B14] overflow-hidden">
+        {/* Faded skull — bleeds off top-right edge */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="https://www.image2url.com/r2/default/images/1776122004235-7b55981b-e92b-4619-b49e-143bb1183ab0.png"
           alt=""
           aria-hidden="true"
-          className="pointer-events-none select-none absolute -top-8 -right-16 md:-right-8 h-[70%] md:h-[90%] max-h-[640px] w-auto object-contain opacity-[0.07]"
+          className="pointer-events-none select-none absolute -top-4 -right-8 md:-top-8 md:-right-8 h-[65%] md:h-[90%] max-h-[640px] w-auto object-contain opacity-[0.08]"
         />
 
-        <div className="flex items-center gap-3 mb-6">
+        <div className="flex items-center gap-3 mb-4 md:mb-6">
           <SkullIcon size={16} className="text-[#7A6E58]" />
           <p className="font-mono text-[10px] tracking-[0.3em] text-[#7A6E58] uppercase">
             POWERED BY $DEAD · $UDEAD · BASE CHAIN
           </p>
         </div>
-        <h1 className="font-serif text-[clamp(56px,10vw,128px)] font-bold leading-[0.9] text-[#D4BF9A] mb-2">Bet your fate.</h1>
-        <h1 className="font-serif text-[clamp(56px,10vw,128px)] font-bold leading-[0.9] italic text-[#DC143C] mb-2">Enter</h1>
-        <h1 className="font-serif text-[clamp(56px,10vw,128px)] font-bold leading-[0.9] text-[#D4BF9A] mb-10">Valhalla.</h1>
-        <div className="w-8 h-[2px] bg-[#DC143C] mb-8" />
-        <p className="text-[#7A6E58] text-sm tracking-wide max-w-sm mb-10">
+
+        {/* Font scales from ~80px on mobile up to 128px on desktop */}
+        <h1 className="font-serif text-[clamp(78px,10vw,128px)] font-bold leading-[0.88] text-[#D4BF9A] mb-1 md:mb-2">Bet your fate.</h1>
+        <h1 className="font-serif text-[clamp(78px,10vw,128px)] font-bold leading-[0.88] italic text-[#DC143C] mb-1 md:mb-2">Enter</h1>
+        <h1 className="font-serif text-[clamp(78px,10vw,128px)] font-bold leading-[0.88] text-[#D4BF9A] mb-6 md:mb-10">Valhalla.</h1>
+
+        <div className="w-8 h-[2px] bg-[#DC143C] mb-5 md:mb-8" />
+
+        <p className="text-[#7A6E58] text-sm tracking-wide max-w-sm mb-6 md:mb-10">
           The dead play different. Predict prices, flip coins, enter war rooms,
           and claim what is yours. Powered by $DEAD and $UDEAD.
         </p>
-        <div className="flex flex-col sm:flex-row gap-4">
+
+        <div className="flex flex-col sm:flex-row gap-3 md:gap-4">
           <ConnectButton className="btn-zookr" />
           <button className="btn-blood" onClick={() => document.getElementById('games')?.scrollIntoView({ behavior: 'smooth' })}>
             The Games
           </button>
         </div>
       </section>
+      </div>{/* end viewport-height wrapper */}
 
       {/* Stats bar */}
       <section className="grid grid-cols-4 border-t border-[#2E2618]">
