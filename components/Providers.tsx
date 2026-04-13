@@ -2,54 +2,31 @@
 
 import { WagmiProvider } from 'wagmi'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { createAppKit } from '@reown/appkit/react'
-import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
-import { base } from '@reown/appkit/networks'
-import { useState, useEffect } from 'react'
+import { ConnectKitProvider } from 'connectkit'
 import { wagmiConfig } from '@/lib/wagmi'
-
-const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || ''
-
-const wagmiAdapter = new WagmiAdapter({
-  networks: [base],
-  projectId,
-})
-
-let appKitInitialized = false
-
-function initAppKit() {
-  if (appKitInitialized || typeof window === 'undefined') return
-  appKitInitialized = true
-  createAppKit({
-    adapters: [wagmiAdapter],
-    networks: [base],
-    projectId,
-    defaultNetwork: base,
-    themeMode: 'dark',
-    themeVariables: {
-      '--w3m-color-mix': '#DC143C',
-      '--w3m-color-mix-strength': 20,
-      '--w3m-accent': '#DC143C',
-      '--w3m-border-radius-master': '0px',
-      '--w3m-font-family': 'Inter, sans-serif',
-    },
-    featuredWalletIds: [
-      'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96', // MetaMask
-    ],
-  })
-}
+import { useState } from 'react'
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient())
 
-  useEffect(() => {
-    initAppKit()
-  }, [])
-
   return (
     <QueryClientProvider client={queryClient}>
       <WagmiProvider config={wagmiConfig}>
-        {children}
+        <ConnectKitProvider
+          theme="midnight"
+          customTheme={{
+            '--ck-accent-color': '#DC143C',
+            '--ck-accent-text-color': '#D4BF9A',
+            '--ck-border-radius': '0px',
+            '--ck-font-family': 'Inter, sans-serif',
+            '--ck-body-background': '#1E1B14',
+            '--ck-body-color': '#D4BF9A',
+            '--ck-body-color-muted': '#7A6E58',
+            '--ck-overlay-background': 'rgba(10,8,6,0.85)',
+          }}
+        >
+          {children}
+        </ConnectKitProvider>
       </WagmiProvider>
     </QueryClientProvider>
   )

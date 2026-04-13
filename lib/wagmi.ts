@@ -1,4 +1,4 @@
-import { http, createConfig } from 'wagmi'
+import { createConfig, http } from 'wagmi'
 import { base } from 'wagmi/chains'
 import { injected, metaMask, walletConnect } from 'wagmi/connectors'
 
@@ -16,7 +16,6 @@ export const wagmiConfig = createConfig({
   },
 })
 
-// DEAD and UDEAD token contract addresses on Base
 export const TOKENS = {
   DEAD: {
     address: process.env.NEXT_PUBLIC_DEAD_TOKEN_ADDRESS as `0x${string}`,

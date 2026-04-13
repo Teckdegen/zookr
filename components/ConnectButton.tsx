@@ -1,18 +1,17 @@
 'use client'
 
-import { useAppKit } from '@reown/appkit/react'
-import { useAccount, useDisconnect } from 'wagmi'
+import { useConnectKit } from 'connectkit'
+import { useAccount } from 'wagmi'
 
 export function ConnectButton({ className }: { className?: string }) {
-  const { open } = useAppKit()
+  const { openConnectModal } = useConnectKit()
   const { address, isConnected } = useAccount()
-  const { disconnect } = useDisconnect()
 
   if (isConnected && address) {
     return (
       <button
         className={className || 'btn-zookr'}
-        onClick={() => open({ view: 'Account' })}
+        onClick={() => openConnectModal?.()}
       >
         {address.slice(0, 6)}...{address.slice(-4)}
       </button>
@@ -22,7 +21,7 @@ export function ConnectButton({ className }: { className?: string }) {
   return (
     <button
       className={className || 'btn-zookr'}
-      onClick={() => open()}
+      onClick={() => openConnectModal?.()}
     >
       Connect Wallet
     </button>
