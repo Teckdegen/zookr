@@ -57,6 +57,12 @@ export default function RoomPage() {
   const livePrice = feed.price?.priceUsd ?? 0
   useEffect(() => { if (livePrice > 0) livePriceRef.current = livePrice }, [livePrice])
 
+  // Must be declared before the useEffect that references it
+  const loadMembers = useCallback(async () => {
+    const { data } = await supabase.from('room_members').select('user_id, username').eq('room_id', roomId)
+    setMembers(data ?? [])
+  }, [roomId])
+
   useEffect(() => {
     if (!address) return
     async function load() {
@@ -78,11 +84,6 @@ export default function RoomPage() {
     }
     load()
   }, [address, roomId, router, loadMembers])
-
-  const loadMembers = useCallback(async () => {
-    const { data } = await supabase.from('room_members').select('user_id, username').eq('room_id', roomId)
-    setMembers(data ?? [])
-  }, [roomId])
 
   useEffect(() => {
     const channel = supabase.channel(`room:${roomId}`)
