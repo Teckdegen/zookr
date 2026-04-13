@@ -2,7 +2,12 @@
   "permissions": {
     "allow": [
       "Bash(npx create-next-app@latest . --typescript --tailwind --eslint --app --no-src-dir --import-alias \"@/*\" --yes)",
-      "Read(//c/Users/divin/AppData/Local/Temp/claude/C--Users-divin-OneDrive-Desktop-zookr/9b485fbf-29c1-439a-9bd6-3c6ab6c49992/tasks/**)"
+      "Read(//c/Users/divin/AppData/Local/Temp/claude/C--Users-divin-OneDrive-Desktop-zookr/9b485fbf-29c1-439a-9bd6-3c6ab6c49992/tasks/**)",
+      "Bash(npm install:*)",
+      "Bash(mkdir -p /c/Users/divin/OneDrive/Desktop/zookr/mediasoup-server/src)",
+      "Bash(npm init:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(xargs sed:*)"
     ]
   }
 }

@@ -1,26 +1,135 @@
 @import "tailwindcss";
 
+/* Fonts loaded via next/font in layout.tsx — no Google CDN import needed */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --dead-black: #0A0806;
+  --bone-ash:   #1E1B14;
+  --bone-white: #D4BF9A;
+  --blood-red:  #8B0000;
+  --crimson:    #DC143C;
+  --muted:      #7A6E58;
+  --border:     #2E2618;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+* { box-sizing: border-box; }
+
+html, body {
+  background: var(--dead-black);
+  color: var(--bone-white);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  font-family: var(--font-sans), Inter, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.font-serif { font-family: var(--font-serif), 'Cormorant Garamond', serif; }
+.font-mono  { font-family: var(--font-mono), 'JetBrains Mono', monospace; }
+.font-sans  { font-family: var(--font-sans), Inter, sans-serif; }
+
+/* ── Page transition ─────────────────────────────────────────────────────── */
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.page-transition {
+  animation: page-in 0.25s ease-out forwards;
+}
+
+/* ── Ticker ──────────────────────────────────────────────────────────────── */
+@keyframes ticker {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.ticker-track {
+  animation: ticker 35s linear infinite;
+  white-space: nowrap;
+  display: inline-flex;
+}
+
+/* ── Win overlay ─────────────────────────────────────────────────────────── */
+@keyframes valhalla-flash {
+  0%   { opacity: 0; transform: scale(0.96); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.valhalla-enter {
+  animation: valhalla-flash 0.35s ease-out forwards;
+}
+
+/* ── Live price pulse ────────────────────────────────────────────────────── */
+@keyframes price-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.55; }
+}
+
+.price-live {
+  animation: price-pulse 1.5s ease-in-out infinite;
+}
+
+/* ── Buttons ─────────────────────────────────────────────────────────────── */
+.btn-zookr {
+  border: 1px solid var(--bone-white);
+  color: var(--bone-white);
+  background: transparent;
+  padding: 12px 32px;
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s;
+}
+.btn-zookr:hover { background: var(--bone-white); color: var(--dead-black); }
+
+.btn-blood {
+  border: 1px solid var(--crimson);
+  color: var(--crimson);
+  background: transparent;
+  padding: 12px 32px;
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s;
+}
+.btn-blood:hover { background: var(--crimson); color: var(--bone-white); }
+
+.btn-filled {
+  background: var(--crimson);
+  color: var(--bone-white);
+  border: 1px solid var(--crimson);
+  padding: 14px 32px;
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: opacity 0.18s;
+  width: 100%;
+}
+.btn-filled:hover    { opacity: 0.85; }
+.btn-filled:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── Input ───────────────────────────────────────────────────────────────── */
+.input-zookr {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--bone-white);
+  padding: 14px 16px;
+  font-size: 16px;
+  width: 100%;
+  outline: none;
+}
+.input-zookr:focus       { border-color: var(--crimson); }
+.input-zookr::placeholder { color: var(--muted); }
+
+/* ── Scrollbar ───────────────────────────────────────────────────────────── */
+::-webkit-scrollbar       { width: 4px; }
+::-webkit-scrollbar-track { background: var(--dead-black); }
+::-webkit-scrollbar-thumb { background: var(--border); }
+
+/* ── Mobile safe area ────────────────────────────────────────────────────── */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .pb-safe { padding-bottom: calc(4rem + env(safe-area-inset-bottom)); }
 }

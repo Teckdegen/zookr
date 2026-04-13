@@ -36,6 +36,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# mediasoup-server — pushed to separate repo
+/mediasoup-server
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
