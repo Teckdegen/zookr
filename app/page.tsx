@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import { useAccount } from 'wagmi'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
