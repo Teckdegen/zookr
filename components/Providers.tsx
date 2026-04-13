@@ -2,24 +2,29 @@
 
 import { WagmiProvider } from 'wagmi'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { createWeb3Modal } from '@web3modal/wagmi/react'
-import { wagmiConfig } from '@/lib/wagmi'
-import { base } from 'wagmi/chains'
+import { createAppKit } from '@reown/appkit/react'
+import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
+import { base } from '@reown/appkit/networks'
 import { useState, useEffect } from 'react'
+import { wagmiConfig } from '@/lib/wagmi'
 
 const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || ''
 
-// Init Web3Modal once
-let web3ModalInitialized = false
+const wagmiAdapter = new WagmiAdapter({
+  networks: [base],
+  projectId,
+})
 
-function initWeb3Modal() {
-  if (web3ModalInitialized || typeof window === 'undefined') return
-  web3ModalInitialized = true
-  createWeb3Modal({
-    wagmiConfig,
+let appKitInitialized = false
+
+function initAppKit() {
+  if (appKitInitialized || typeof window === 'undefined') return
+  appKitInitialized = true
+  createAppKit({
+    adapters: [wagmiAdapter],
+    networks: [base],
     projectId,
-    chains: [base],
-    defaultChain: base,
+    defaultNetwork: base,
     themeMode: 'dark',
     themeVariables: {
       '--w3m-color-mix': '#DC143C',
@@ -29,8 +34,8 @@ function initWeb3Modal() {
       '--w3m-font-family': 'Inter, sans-serif',
     },
     featuredWalletIds: [
-      'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96', // MetaMask
-      'fd20dc426fb37566d803205b19bbc1d4096b248ac04548e3cfb6b3a38bd033aa', // Coinbase
+      'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96',
+      'fd20dc426fb37566d803205b19bbc1d4096b248ac04548e3cfb6b3a38bd033aa',
     ],
   })
 }
@@ -39,7 +44,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient())
 
   useEffect(() => {
-    initWeb3Modal()
+    initAppKit()
   }, [])
 
   return (
