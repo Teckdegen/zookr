@@ -51,6 +51,8 @@ export default function RoomPage() {
   const chatEndRef = useRef<HTMLDivElement>(null)
   const spinIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const livePriceRef = useRef<number>(0)
+  // Single shared channel ref — all sends must use this, not supabase.channel() inline
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null)
 
   // Live price feed for flash price mode
   const feed = usePriceFeed(flashToken, 1000)
@@ -86,7 +88,9 @@ export default function RoomPage() {
   }, [address, roomId, router, loadMembers])
 
   useEffect(() => {
-    const channel = supabase.channel(`room:${roomId}`)
+    const channel = supabase.channel(`room:${roomId}`, {
+      config: { broadcast: { self: false } }, // don't echo back to sender
+    })
       .on('broadcast', { event: 'chat' }, ({ payload }) => {
         setMessages((prev) => [...prev, payload])
         setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50)
@@ -111,7 +115,8 @@ export default function RoomPage() {
         router.push('/dashboard')
       })
       .subscribe()
-    return () => { supabase.removeChannel(channel) }
+    channelRef.current = channel
+    return () => { supabase.removeChannel(channel); channelRef.current = null }
   }, [roomId, loadMembers])
 
   // Generate reel prices around current live price
@@ -186,16 +191,18 @@ export default function RoomPage() {
     e.preventDefault()
     if (!chatInput.trim() || !username) return
     const msg = { username, text: chatInput.trim(), ts: Date.now() }
-    await supabase.channel(`room:${roomId}`).send({ type: 'broadcast', event: 'chat', payload: msg })
+    // Add locally immediately so sender sees it; others receive via broadcast
     setMessages((prev) => [...prev, msg])
     setChatInput('')
     setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50)
+    // Use the SAME subscribed channel — new channel() calls are disconnected
+    await channelRef.current?.send({ type: 'broadcast', event: 'chat', payload: msg })
   }
 
   async function closeRoom() {
     if (!isHost || !userId) return
     await supabase.from('rooms').update({ status: 'closed' }).eq('id', roomId)
-    await supabase.channel(`room:${roomId}`).send({ type: 'broadcast', event: 'room_closed', payload: {} })
+    await channelRef.current?.send({ type: 'broadcast', event: 'room_closed', payload: {} })
     router.push('/dashboard')
   }
 
@@ -208,7 +215,7 @@ export default function RoomPage() {
       winner_payout: room.stake_amount * members.length * 0.7,
     }).select().single()
     if (!round) return
-    await supabase.channel(`room:${roomId}`).send({ type: 'broadcast', event: 'round_start', payload: { round_id: round.id } })
+    await channelRef.current?.send({ type: 'broadcast', event: 'round_start', payload: { round_id: round.id } })
   }
 
   async function joinRound() {

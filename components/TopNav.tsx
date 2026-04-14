@@ -16,7 +16,7 @@ function HomeIcon({ size = 16 }: { size?: number }) {
 
 const NAV_ITEMS = [
   { href: '/dashboard', label: 'HOME',  icon: <HomeIcon size={15} /> },
-  { href: '/game/price', label: 'FIGHT', icon: <SwordIcon size={15} /> },
+  { href: '/games',     label: 'GAMES', icon: <SwordIcon size={15} /> },
   { href: '/rooms',     label: 'ROOMS', icon: <SkullIcon size={15} /> },
   { href: '/profile',   label: 'SOUL',  icon: <SkeletonHead size={15} /> },
 ]

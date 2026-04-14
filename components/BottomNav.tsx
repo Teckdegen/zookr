@@ -17,7 +17,7 @@ type NavItem = 'home' | 'play' | 'rooms' | 'profile'
 export function BottomNav({ active }: { active: NavItem }) {
   const items: { key: NavItem; label: string; icon: React.ReactNode; href: string }[] = [
     { key: 'home',    label: 'HOME',  icon: <HomeIcon size={18} />,     href: '/dashboard' },
-    { key: 'play',   label: 'FIGHT', icon: <SwordIcon size={18} />,    href: '/game/price' },
+    { key: 'play',   label: 'GAMES', icon: <SwordIcon size={18} />,    href: '/games' },
     { key: 'rooms',  label: 'ROOMS', icon: <SkullIcon size={18} />,    href: '/rooms' },
     { key: 'profile',label: 'SOUL',  icon: <SkeletonHead size={18} />, href: '/profile' },
   ]
