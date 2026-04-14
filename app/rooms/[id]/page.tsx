@@ -107,6 +107,9 @@ export default function RoomPage() {
         setWinnerName(payload.winner_username)
         setRoundStatus('result')
       })
+      .on('broadcast', { event: 'room_closed' }, () => {
+        router.push('/dashboard')
+      })
       .subscribe()
     return () => { supabase.removeChannel(channel) }
   }, [roomId, loadMembers])
@@ -187,6 +190,13 @@ export default function RoomPage() {
     setMessages((prev) => [...prev, msg])
     setChatInput('')
     setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50)
+  }
+
+  async function closeRoom() {
+    if (!isHost || !userId) return
+    await supabase.from('rooms').update({ status: 'closed' }).eq('id', roomId)
+    await supabase.channel(`room:${roomId}`).send({ type: 'broadcast', event: 'room_closed', payload: {} })
+    router.push('/dashboard')
   }
 
   async function startRound() {
@@ -288,6 +298,11 @@ export default function RoomPage() {
               </button>
               <button onClick={leaveCall} className="font-mono text-[9px] text-[#7A6E58] border border-[#2E2618] px-3 py-1.5">End</button>
             </>
+          )}
+          {isHost && (
+            <button onClick={closeRoom} className="font-mono text-[9px] text-[#DC143C] border border-[#DC143C]/40 px-3 py-1.5 hover:bg-[#DC143C]/10 transition-colors">
+              Close Room
+            </button>
           )}
           <button onClick={() => setChatOpen(!chatOpen)} className="md:hidden font-mono text-[9px] text-[#7A6E58] border border-[#2E2618] px-3 py-1.5">
             Chat

@@ -9,54 +9,58 @@ import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { Ticker } from '@/components/Ticker'
 import { AppLayout } from '@/components/AppLayout'
-import { SkullIcon, SwordIcon } from '@/components/icons'
-import { SkeletonBalance, SkeletonRoomCard } from '@/components/SkeletonChart'
+import { SkullIcon, SwordIcon, SkeletonHead } from '@/components/icons'
+import { SkeletonRoomCard } from '@/components/SkeletonChart'
 import { usePriceFeed } from '@/hooks/usePriceFeed'
 
+const SKULL_IMG = 'https://www.image2url.com/r2/default/images/1776122004235-7b55981b-e92b-4619-b49e-143bb1183ab0.png'
+
 type Room = { id: string; name: string; game_mode: string; max_players: number; stake_amount: number }
+
+const GAMES = [
+  { href: '/game/price', label: 'DEAD PRICE',  sub: 'Stop the reel',  icon: <SkullIcon size={22} className="text-[#DC143C]" />,  locked: false },
+  { href: '/game/coin',  label: 'COIN FLIP',   sub: 'Heads or tails', icon: <SkeletonHead size={22} className="text-[#DC143C]" />, locked: false },
+  { href: '/game/chart', label: 'WAR CHART',   sub: 'Private access', icon: <SwordIcon size={22} className="text-[#7A6E58]" />,  locked: true  },
+]
 
 export default function DashboardPage() {
   const { address, isConnected } = useAccount()
   const router = useRouter()
-  const [username, setUsername] = useState('')
-  const [balance, setBalance] = useState({ dead: 0, udead: 0 })
-  const [rooms, setRooms] = useState<Room[]>([])
-  const [loading, setLoading] = useState(true)
+  const [username, setUsername]   = useState('')
+  const [balance, setBalance]     = useState({ dead: 0, udead: 0 })
+  const [rooms, setRooms]         = useState<Room[]>([])
+  const [loading, setLoading]     = useState(true)
+  const [balLoading, setBalLoading] = useState(true)
 
-  // Live prices for USD conversion
-  const deadFeed  = usePriceFeed('DEAD',  15000)
-  const udeadFeed = usePriceFeed('UDEAD', 15000)
+  const deadFeed  = usePriceFeed('DEAD',  20000)
+  const udeadFeed = usePriceFeed('UDEAD', 20000)
   const deadPrice  = deadFeed.price?.priceUsd  ?? 0
   const udeadPrice = udeadFeed.price?.priceUsd ?? 0
-  const totalUsd   = balance.dead * deadPrice + balance.udead * udeadPrice
+  const pricesReady = !deadFeed.loading && !udeadFeed.loading
+  const totalUsd    = balance.dead * deadPrice + balance.udead * udeadPrice
 
   useEffect(() => {
     if (!isConnected || !address) { router.push('/'); return }
-
     async function load() {
-      const { data: user } = await supabase
-        .from('users').select('username')
+      const { data: user } = await supabase.from('users').select('username')
         .eq('wallet_address', address!.toLowerCase()).single()
-
       if (!user) { router.push('/onboard'); return }
       setUsername(user.username)
 
-      // Real on-chain balance from connected wallet
-      const balRes = await fetch(`/api/wallet/balance?wallet_address=${address}`)
+      const balRes  = await fetch(`/api/wallet/balance?wallet_address=${address}`)
       const balData = balRes.ok ? await balRes.json() : { dead: 0, udead: 0 }
       setBalance({ dead: balData.dead ?? 0, udead: balData.udead ?? 0 })
+      setBalLoading(false)
 
-      const { data: roomData } = await supabase
-        .from('rooms').select('*').eq('status', 'waiting')
-        .order('created_at', { ascending: false }).limit(5)
+      const { data: roomData } = await supabase.from('rooms').select('*')
+        .eq('status', 'waiting').order('created_at', { ascending: false }).limit(6)
       setRooms(roomData ?? [])
       setLoading(false)
     }
-
     load()
   }, [isConnected, address, router])
 
-  if (loading) {
+  if (loading && balLoading) {
     return (
       <main className="min-h-screen bg-[#0A0806] flex items-center justify-center">
         <div className="flex items-center gap-3">
@@ -67,156 +71,162 @@ export default function DashboardPage() {
     )
   }
 
+  const usdDisplay = balLoading || !pricesReady
+    ? '...'
+    : `$${totalUsd.toFixed(2)}`
+
   return (
     <AppLayout active="home">
       <Ticker />
 
-      <div className="md:hidden border-b border-[#2E2618] px-6 py-4 flex justify-between items-center bg-[#1E1B14]">
+      {/* ── Mobile greeting bar ── */}
+      <div className="md:hidden border-b border-[#2E2618] px-5 py-3 flex justify-between items-center bg-[#1E1B14]">
         <div className="flex items-center gap-2">
-          <SkullIcon size={16} className="text-[#DC143C]" />
-          <span className="font-serif text-lg text-[#D4BF9A]">ZOOKR</span>
+          <SkullIcon size={14} className="text-[#DC143C]" />
+          <span className="font-serif text-base text-[#D4BF9A]">ZOOKR</span>
         </div>
         <span className="font-mono text-[10px] text-[#7A6E58]">@{username}</span>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 md:px-8 py-6 md:py-10">
-        <div className="grid md:grid-cols-3 gap-6">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-12 py-6 md:py-8 space-y-6">
 
-          {/* Left col */}
-          <div className="md:col-span-1 flex flex-col gap-4">
+        {/* ── TOP BANNER: balance + greeting ── */}
+        <div className="relative overflow-hidden border border-[#2E2618] bg-[#1E1B14]">
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#DC143C] via-[#8B0000] to-transparent" />
 
-            {/* Wallet balance card */}
-            <div className="border border-[#2E2618] bg-[#1E1B14] p-6 relative overflow-hidden">
-              {/* Top accent line */}
-              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#DC143C] via-[#8B0000] to-transparent" />
+          {/* Skull watermark */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={SKULL_IMG} alt="" aria-hidden
+            className="pointer-events-none select-none absolute right-0 top-0 h-full w-auto object-contain opacity-[0.05]" />
 
-              <p className="font-mono text-[9px] tracking-[0.3em] text-[#7A6E58] uppercase mb-1">Wallet Balance</p>
-              <p className="font-mono text-[9px] text-[#7A6E58] mb-4">
-                {address?.slice(0, 6)}...{address?.slice(-4)}
+          <div className="relative px-6 md:px-10 py-6 md:py-8 flex flex-col md:flex-row md:items-center gap-6 md:gap-0">
+            {/* Left: greeting + address */}
+            <div className="flex-1">
+              <p className="font-mono text-[9px] tracking-[0.35em] text-[#7A6E58] uppercase mb-1">Welcome back</p>
+              <h2 className="font-serif text-2xl md:text-3xl font-bold text-[#D4BF9A]">@{username}</h2>
+              <p className="font-mono text-[9px] text-[#7A6E58] mt-1">
+                {address?.slice(0, 8)}...{address?.slice(-6)}
               </p>
-
-              {loading ? <SkeletonBalance /> : (
-                <>
-                  {/* USD total */}
-                  <div className="mb-5">
-                    <p className="font-serif text-4xl font-bold text-[#D4BF9A] leading-none">
-                      ${totalUsd > 0 ? totalUsd.toFixed(2) : '—'}
-                    </p>
-                    <p className="font-mono text-[9px] text-[#7A6E58] mt-1">USD value</p>
-                  </div>
-
-                  {/* Token breakdown */}
-                  <div className="flex flex-col gap-2 pt-4 border-t border-[#2E2618]">
-                    <div className="flex justify-between items-center">
-                      <span className="font-mono text-[10px] text-[#7A6E58]">$DEAD</span>
-                      <div className="text-right">
-                        <span className="font-mono text-sm text-[#D4BF9A]">
-                          {balance.dead.toLocaleString(undefined, { maximumFractionDigits: 0 })}
-                        </span>
-                        {deadPrice > 0 && (
-                          <span className="font-mono text-[9px] text-[#7A6E58] ml-2">
-                            ≈ ${(balance.dead * deadPrice).toFixed(2)}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="font-mono text-[10px] text-[#7A6E58]">$UDEAD</span>
-                      <div className="text-right">
-                        <span className="font-mono text-sm text-[#D4BF9A]">
-                          {balance.udead.toLocaleString(undefined, { maximumFractionDigits: 0 })}
-                        </span>
-                        {udeadPrice > 0 && (
-                          <span className="font-mono text-[9px] text-[#7A6E58] ml-2">
-                            ≈ ${(balance.udead * udeadPrice).toFixed(2)}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </>
-              )}
             </div>
 
-            {/* Game modes */}
-            <div>
-              <p className="font-mono text-[9px] tracking-[0.3em] text-[#7A6E58] uppercase mb-3">Choose Your Fate</p>
-              <div className="grid grid-cols-2 md:grid-cols-1 gap-px bg-[#2E2618]">
-                <Link href="/game/price">
-                  <div className="bg-[#1E1B14] p-5 flex items-center gap-3 hover:bg-[#2E2618] transition-colors cursor-pointer">
-                    <SkullIcon size={24} className="text-[#DC143C] shrink-0" />
-                    <div>
-                      <p className="font-serif text-base font-bold text-[#D4BF9A]">DEAD PRICE</p>
-                      <p className="font-mono text-[9px] text-[#7A6E58]">Stop the reel</p>
-                    </div>
+            {/* Divider */}
+            <div className="hidden md:block w-px self-stretch bg-[#2E2618] mx-10" />
+
+            {/* Center: total USD */}
+            <div className="flex-1 md:text-center">
+              <p className="font-mono text-[9px] tracking-[0.3em] text-[#7A6E58] uppercase mb-1">Portfolio Value</p>
+              <p className={`font-serif text-4xl md:text-5xl font-bold text-[#D4BF9A] leading-none ${(balLoading || !pricesReady) ? 'animate-pulse' : ''}`}>
+                {usdDisplay}
+              </p>
+              <p className="font-mono text-[9px] text-[#7A6E58] mt-1">USD</p>
+            </div>
+
+            {/* Divider */}
+            <div className="hidden md:block w-px self-stretch bg-[#2E2618] mx-10" />
+
+            {/* Right: token breakdown */}
+            <div className="flex-1 flex flex-col gap-3">
+              {[
+                { sym: 'DEAD',  bal: balance.dead,  price: deadPrice,  loading: deadFeed.loading },
+                { sym: 'UDEAD', bal: balance.udead, price: udeadPrice, loading: udeadFeed.loading },
+              ].map(({ sym, bal, price, loading: pl }) => (
+                <div key={sym} className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className={`w-1.5 h-1.5 rounded-full ${pl ? 'bg-[#7A6E58] animate-pulse' : 'bg-[#DC143C]'}`} />
+                    <span className="font-mono text-[10px] text-[#7A6E58]">${sym}</span>
                   </div>
-                </Link>
-                <Link href="/game/coin">
-                  <div className="bg-[#1E1B14] p-5 flex items-center gap-3 hover:bg-[#2E2618] transition-colors cursor-pointer">
-                    <SwordIcon size={24} className="text-[#DC143C] shrink-0" />
-                    <div>
-                      <p className="font-serif text-base font-bold text-[#D4BF9A]">COIN FLIP</p>
-                      <p className="font-mono text-[9px] text-[#7A6E58]">Heads or tails</p>
-                    </div>
+                  <div className="text-right">
+                    <span className="font-mono text-sm text-[#D4BF9A]">
+                      {bal.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                    </span>
+                    {price > 0 && (
+                      <span className="font-mono text-[9px] text-[#7A6E58] ml-2">
+                        @ ${price < 0.01 ? price.toFixed(6) : price.toFixed(4)}
+                      </span>
+                    )}
                   </div>
-                </Link>
-                <Link href="/game/chart">
-                  <div className="bg-[#1E1B14] p-5 flex items-center gap-3 hover:bg-[#2E2618] transition-colors cursor-pointer opacity-60">
-                    <SwordIcon size={24} className="text-[#7A6E58] shrink-0" />
-                    <div>
-                      <p className="font-serif text-base font-bold text-[#7A6E58]">WAR CHART</p>
-                      <p className="font-mono text-[9px] text-[#7A6E58]">🔒 Private access</p>
-                    </div>
-                  </div>
-                </Link>
-              </div>
+                </div>
+              ))}
             </div>
           </div>
+        </div>
 
-          {/* Right col — war rooms */}
-          <div className="md:col-span-2">
-            <div className="flex justify-between items-center mb-3">
-              <p className="font-mono text-[9px] tracking-[0.3em] text-[#7A6E58] uppercase">War Rooms</p>
+        {/* ── MAIN GRID ── */}
+        <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+
+          {/* Game cards — 1 col on md, stays 1 col on lg */}
+          <div className="md:col-span-1 flex flex-col gap-3">
+            <p className="font-mono text-[9px] tracking-[0.35em] text-[#7A6E58] uppercase">Choose Your Fate</p>
+            {GAMES.map((g) => (
+              <Link key={g.href} href={g.href}>
+                <div className={`border border-[#2E2618] bg-[#1E1B14] px-5 py-4 flex items-center gap-4
+                  ${g.locked ? 'opacity-50 cursor-not-allowed' : 'hover:border-[#DC143C]/50 hover:bg-[#2E2618] transition-all cursor-pointer group'}`}>
+                  <div className="shrink-0">{g.icon}</div>
+                  <div>
+                    <p className={`font-serif text-base font-bold ${g.locked ? 'text-[#7A6E58]' : 'text-[#D4BF9A] group-hover:text-white'}`}>{g.label}</p>
+                    <p className="font-mono text-[9px] text-[#7A6E58]">{g.locked ? '🔒 ' : ''}{g.sub}</p>
+                  </div>
+                  {!g.locked && <span className="ml-auto font-mono text-[10px] text-[#DC143C] opacity-0 group-hover:opacity-100 transition-opacity">→</span>}
+                </div>
+              </Link>
+            ))}
+
+            {/* War Rooms quick link */}
+            <Link href="/rooms">
+              <div className="border border-[#2E2618] bg-[#1E1B14] px-5 py-4 flex items-center gap-4 hover:border-[#DC143C]/50 hover:bg-[#2E2618] transition-all cursor-pointer group">
+                <SkullIcon size={22} className="text-[#DC143C] shrink-0" />
+                <div>
+                  <p className="font-serif text-base font-bold text-[#D4BF9A] group-hover:text-white">WAR ROOMS</p>
+                  <p className="font-mono text-[9px] text-[#7A6E58]">PvP battle rooms</p>
+                </div>
+                <span className="ml-auto font-mono text-[10px] text-[#DC143C] opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+              </div>
+            </Link>
+          </div>
+
+          {/* War Rooms list — 2 col on md, 3 col on lg */}
+          <div className="md:col-span-2 lg:col-span-3 flex flex-col gap-3">
+            <div className="flex justify-between items-center">
+              <p className="font-mono text-[9px] tracking-[0.35em] text-[#7A6E58] uppercase">Live War Rooms</p>
               <Link href="/rooms/create">
-                <button className="font-mono text-[9px] text-[#DC143C] tracking-widest uppercase hover:underline flex items-center gap-1">
-                  <SkullIcon size={10} />+ Open Room
+                <button className="font-mono text-[9px] text-[#DC143C] tracking-widest uppercase hover:underline flex items-center gap-1 border border-[#DC143C]/30 px-3 py-1.5 hover:bg-[#DC143C]/5 transition-colors">
+                  <SkullIcon size={10} className="mr-1" />+ Open Room
                 </button>
               </Link>
             </div>
 
-            <div className="flex flex-col gap-px bg-[#2E2618]">
-              {loading ? (
-                Array.from({ length: 3 }).map((_, i) => <SkeletonRoomCard key={i} />)
-              ) : rooms.length === 0 ? (
-                <div className="bg-[#1E1B14] px-6 py-12 text-center">
-                  <SkullIcon size={32} className="text-[#2E2618] mx-auto mb-4" />
-                  <p className="font-mono text-[10px] text-[#7A6E58] tracking-wide mb-4">No rooms open. Be the first warrior.</p>
-                  <Link href="/rooms/create">
-                    <button className="btn-blood">Open a Room</button>
-                  </Link>
-                </div>
-              ) : (
-                rooms.map((room) => (
+            {loading ? (
+              <div className="flex flex-col gap-px bg-[#2E2618]">
+                {Array.from({ length: 4 }).map((_, i) => <SkeletonRoomCard key={i} />)}
+              </div>
+            ) : rooms.length === 0 ? (
+              <div className="border border-[#2E2618] bg-[#1E1B14] px-6 py-16 text-center flex flex-col items-center gap-4">
+                <SkullIcon size={40} className="text-[#2E2618]" />
+                <p className="font-mono text-[10px] text-[#7A6E58] tracking-wide">No rooms open. Be the first warrior.</p>
+                <Link href="/rooms/create">
+                  <button className="btn-blood text-xs px-6 py-2">Open a Room</button>
+                </Link>
+              </div>
+            ) : (
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-px bg-[#2E2618]">
+                {rooms.map((room) => (
                   <Link key={room.id} href={`/rooms/${room.id}`}>
-                    <div className="bg-[#1E1B14] px-6 py-4 flex justify-between items-center hover:bg-[#2E2618] transition-colors cursor-pointer">
-                      <div className="flex items-center gap-3">
-                        <span className="w-2 h-2 rounded-full bg-[#DC143C] shrink-0 animate-pulse" />
-                        <div>
-                          <p className="font-mono text-sm text-[#D4BF9A]">{room.name}</p>
-                          <p className="font-mono text-[9px] text-[#7A6E58] mt-0.5">
-                            {room.game_mode} · ${room.stake_amount} stake
-                          </p>
-                        </div>
+                    <div className="bg-[#1E1B14] px-5 py-4 flex flex-col gap-2 hover:bg-[#2E2618] transition-colors cursor-pointer h-full group">
+                      <div className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#DC143C] animate-pulse shrink-0" />
+                        <p className="font-mono text-sm text-[#D4BF9A] truncate group-hover:text-white">{room.name}</p>
                       </div>
-                      <div className="flex items-center gap-4 shrink-0">
-                        <span className="font-mono text-[9px] text-[#7A6E58] hidden sm:block">{room.max_players} max</span>
-                        <span className="font-mono text-[9px] text-[#DC143C] tracking-widest">→</span>
+                      <div className="flex items-center justify-between mt-auto">
+                        <p className="font-mono text-[9px] text-[#7A6E58] uppercase tracking-wider">
+                          {room.game_mode === 'flash_price' ? 'Flash Price' : 'Dice'} · ${room.stake_amount}
+                        </p>
+                        <span className="font-mono text-[9px] text-[#7A6E58]">{room.max_players} max</span>
                       </div>
                     </div>
                   </Link>
-                ))
-              )}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
